@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>교통대 꿀팁 지도</title>
+  <meta name="description" content="국립한국교통대학교 충주캠퍼스 학생들이 직접 모은 지름길·쉬는 곳·공부 장소·맛집 꿀팁 지도">
+  <meta property="og:title" content="교통대 꿀팁 지도 | 충주캠퍼스">
+  <meta property="og:description" content="학생들이 직접 모은 충주캠퍼스 지름길·쉬는 곳·공부 장소·맛집">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍯</text></svg>">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+  <link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">🍯</span>
+      <div>
+        <h1>교통대 꿀팁 지도</h1>
+        <p class="sub">충주캠퍼스 학생들이 직접 모은 꿀팁 <b id="totalCount">0</b>개</p>
+      </div>
+    </div>
+    <label class="search">
+      <span aria-hidden="true">🔍</span>
+      <input id="q" type="search" placeholder="장소·꿀팁·강의실 검색 (예: 테크노관 213, 컴퓨터공학, 프린트)" autocomplete="off">
+    </label>
+  </header>
+
+  <nav class="chips" id="chips" aria-label="카테고리"></nav>
+
+  <div class="view-toggle" role="tablist" aria-label="보기 전환">
+    <button role="tab" data-view="map" aria-selected="true">🗺️ 지도</button>
+    <button role="tab" data-view="list" aria-selected="false">📋 목록</button>
+  </div>
+
+  <main class="layout" data-view="map">
+    <aside class="side" aria-label="꿀팁 목록">
+      <section id="find" class="find" hidden></section>
+      <section id="rent" class="rent" hidden></section>
+      <section id="routes" class="routes"></section>
+      <div class="list-head">
+        <span id="listCount"></span>
+        <label class="only-map"><input type="checkbox" id="onlyMap"> 지도에 있는 것만</label>
+      </div>
+      <ul id="list" class="list"></ul>
+    </aside>
+
+    <section class="map-wrap">
+      <div id="map" aria-label="충주캠퍼스 지도"></div>
+      <div class="legend" id="legend"></div>
+      <article id="detail" class="detail" hidden></article>
+    </section>
+  </main>
+
+  <footer class="foot">
+    데이터: 충주캠퍼스 학생 21명이 제출한 원본 522건을 정리한 장소표 · 자취방 시세: 국토교통부 실거래가 공개시스템 전월세 신고 + 블루밍·당근부동산·다방 공개 매물(<span id="rentChecked"></span> 확인) · 지도: © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors (ODbL)<br>
+    학생이 확인한 날 기준 정보라 지금과 다를 수 있어요. 위치가 "대략"으로 표시된 곳은 주소로 추정한 위치예요.
+  </footer>
+
+  <script src="assets/vendor/leaflet/leaflet.js"></script>
+  <script src="data/places.js"></script>
+  <script src="data/rent.js"></script>
+  <script src="data/bluming.js"></script>
+  <script src="data/floors.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
