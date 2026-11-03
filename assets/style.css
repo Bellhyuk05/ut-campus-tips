@@ -161,8 +161,8 @@ h1 { font-size: 20px; margin: 0; letter-spacing: -.02em; }
   box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
 }
 .pin.approx { border-style: dashed; }
-.leaflet-marker-icon:hover .pin, .pin.sel { transform: rotate(-45deg) scale(1.18); }
-.pin.sel { box-shadow: 0 0 0 5px color-mix(in srgb, var(--c) 35%, transparent), 0 3px 8px rgba(0, 0, 0, .3); }
+.leaflet-marker-icon:hover .pin { transform: rotate(-45deg) scale(1.1); }
+.pin.sel { border-color: #e8590c; border-width: 4px; }
 
 .blabel {
   white-space: nowrap; font: 600 11px/1.2 var(--font); color: #6b4a1a;
@@ -358,22 +358,8 @@ h1 { font-size: 20px; margin: 0; letter-spacing: -.02em; }
 .blum-box { background: #e7f5ff; border: 1px solid #a5d8ff; border-radius: 10px; padding: 9px 12px; margin-top: 10px; font-size: 14px; display: grid; gap: 3px; }
 .blum-box small { color: var(--ink-2); }
 
-/* ------------------------------------------------ 선택한 위치 강조 */
-.focus { position: relative; width: 0; height: 0; pointer-events: none; }
-.focus .ring {
-  position: absolute; left: -28px; top: -51px; width: 56px; height: 56px; border-radius: 50%;
-  border: 3px solid #e8590c; box-shadow: 0 0 0 2px #fff;
-}
-.focus .flabel {
-  position: absolute; left: 0; bottom: 60px; transform: translateX(-50%);
-  white-space: nowrap; background: #e8590c; color: #fff; font: 700 13.5px/1 var(--font);
-  padding: 8px 12px; border-radius: 999px; box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
-}
-.focus .flabel::after {
-  content: ""; position: absolute; left: 50%; bottom: -6px; margin-left: -6px;
-  border: 6px solid transparent; border-top-color: #e8590c; border-bottom: 0;
-}
-.focus.soft .ring { border-color: #868e96; border-style: dashed; }
-.focus.soft .flabel { background: rgba(43, 38, 32, .85); }
-.focus.soft .flabel::after { border-top-color: rgba(43, 38, 32, .85); }
+/* ------------------------------------------------ 선택한 위치 강조: 마커 테두리만 */
+.focus-on .pin, .focus-on .bpin, .focus-on .hpin { border-color: #e8590c; border-width: 4px; }
+.focus-on .hdot { border-color: #e8590c; border-width: 3px; }
+.focus-soft .pin, .focus-soft .bpin, .focus-soft .hpin, .focus-soft .hdot { border-color: #ffa94d; }
 .btn.locate { background: #fff4e6; border-color: #ffc078; color: #c2410c; font-weight: 600; }

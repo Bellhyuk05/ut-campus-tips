@@ -117,8 +117,7 @@
 
   var markerLayer = L.layerGroup().addTo(map);
 
-  // ------------------------------------------------------------ 선택한 위치 강조 (깜빡이는 원 + 이름표)
-  var focusLayer = L.layerGroup().addTo(map);
+  // ------------------------------------------------------------ 선택한 위치 강조: 그 자리 마커의 테두리만 진하게
   var focusAt = null;
   function placeLabel(p) {
     var b = p.b && BLD[p.b];
@@ -126,17 +125,27 @@
     return p.name + (b && p.name.indexOf(b.name.split("/")[0]) < 0 ? " · " + b.name.split("/")[0] : "") +
       (p.b ? " (" + p.b + ")" : "") + (fl ? " " + fl + "층" : "");
   }
-  function showFocus(x, y, label, soft) {
-    focusLayer.clearLayers();
-    focusAt = [x, y];
-    L.marker(ll(x, y), {
-      interactive: false, keyboard: false, zIndexOffset: 2000,
-      icon: L.divIcon({ className: "", iconSize: [0, 0], iconAnchor: [0, 0],
-        html: '<div class="focus' + (soft ? " soft" : "") + '"><span class="ring"></span>' +
-          (label ? '<span class="flabel">📍 ' + esc(label) + "</span>" : "") + "</div>" })
-    }).addTo(focusLayer);
+  function markFocus(x, y, cls) {
+    var target = ll(x, y);
+    markerLayer.eachLayer(function (m) {
+      var el = m.getElement && m.getElement();
+      if (!el) return;
+      var p = m.getLatLng();
+      if (Math.abs(p.lat - target[0]) < 0.5 && Math.abs(p.lng - target[1]) < 0.5) el.classList.add(cls);
+    });
   }
-  function clearFocus() { focusLayer.clearLayers(); focusAt = null; }
+  function unmark(cls) {
+    var on = document.querySelectorAll("." + cls);
+    for (var i = 0; i < on.length; i++) on[i].classList.remove(cls);
+  }
+  function showFocus(x, y, label, soft) {
+    unmark("focus-soft");
+    if (soft) { markFocus(x, y, "focus-soft"); return; }
+    unmark("focus-on");
+    focusAt = [x, y];
+    markFocus(x, y, "focus-on");
+  }
+  function clearFocus() { unmark("focus-on"); unmark("focus-soft"); focusAt = null; }
 
   // 상세 카드(데스크톱: 오른쪽 / 모바일: 아래)에 가리지 않는 곳으로 지도를 옮김
   function flyToVisible(target, z) {
@@ -484,6 +493,7 @@
         zIndexOffset: 1000
       }).on("click", function () { showBuilding(h.code, h.floor, h.room); }).addTo(markerLayer);
     });
+    if (focusAt) markFocus(focusAt[0], focusAt[1], "focus-on");
   }
 
   function subItem(p) {
@@ -818,10 +828,7 @@
     var p = PLACE[+li.dataset.id];
     if (p && p.x != null && state.sel !== p.id) showFocus(p.x, p.y, placeLabel(p), true);
   });
-  $("#list").addEventListener("mouseleave", function () {
-    var p = state.sel && PLACE[state.sel];
-    if (p && p.x != null) showFocus(p.x, p.y, placeLabel(p)); else if (!detailCtx || !detailCtx.bld) clearFocus();
-  });
+  $("#list").addEventListener("mouseleave", function () { unmark("focus-soft"); });
   $("#list").addEventListener("click", function (e) {
     var li = e.target.closest(".item");
     if (li) selectPlace(+li.dataset.id);
