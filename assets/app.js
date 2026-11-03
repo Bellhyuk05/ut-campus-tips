@@ -116,6 +116,40 @@
   onZoom();
 
   var markerLayer = L.layerGroup().addTo(map);
+
+  // ------------------------------------------------------------ 선택한 위치 강조 (깜빡이는 원 + 이름표)
+  var focusLayer = L.layerGroup().addTo(map);
+  var focusAt = null;
+  function placeLabel(p) {
+    var b = p.b && BLD[p.b];
+    var fl = (p.loc.match(/(\d+)\s*층/) || [])[1];
+    return p.name + (b && p.name.indexOf(b.name.split("/")[0]) < 0 ? " · " + b.name.split("/")[0] : "") +
+      (p.b ? " (" + p.b + ")" : "") + (fl ? " " + fl + "층" : "");
+  }
+  function showFocus(x, y, label, soft) {
+    focusLayer.clearLayers();
+    focusAt = [x, y];
+    L.marker(ll(x, y), {
+      interactive: false, keyboard: false, zIndexOffset: 2000,
+      icon: L.divIcon({ className: "", iconSize: [0, 0], iconAnchor: [0, 0],
+        html: '<div class="focus' + (soft ? " soft" : "") + '"><span class="ring"></span><span class="ring r2"></span>' +
+          (label ? '<span class="flabel">📍 ' + esc(label) + "</span>" : "") + "</div>" })
+    }).addTo(focusLayer);
+  }
+  function clearFocus() { focusLayer.clearLayers(); focusAt = null; }
+
+  // 상세 카드(데스크톱: 오른쪽 / 모바일: 아래)에 가리지 않는 곳으로 지도를 옮김
+  function flyToVisible(target, z) {
+    moveMap(function () {
+      var size = map.getSize(), card = $("#detail");
+      var dx = 0, dy = 0;
+      if (isMobile()) dy = size.y * 0.25;
+      else if (card && !card.hidden) dx = Math.min(card.offsetWidth + 24, size.x * 0.5) / 2;
+      var c = map.unproject(map.project(target, z).add([dx, dy]), z);
+      if (isMobile()) map.setView(c, z, { animate: false });
+      else map.flyTo(c, z, { duration: 0.5 });
+    });
+  }
   var routeLayer = L.layerGroup().addTo(map);
   var markerByKey = {};
 
@@ -582,7 +616,9 @@
     var floors = f.floors.slice().sort(function (a, c) { return parseInt(c[0]) - parseInt(a[0]); });
     var hasHi = hiFloor && floors.some(function (fl) { return floorHas(fl[0], hiFloor); });
     if (isMobile()) setView("map");
-    moveMap(function () { map.flyTo(ll(b.x, b.y), Math.max(map.getZoom(), homeZoom + 0.75), { duration: 0.5 }); });
+    $("#detail").hidden = false;
+    flyToVisible(ll(b.x, b.y), Math.max(map.getZoom(), homeZoom + 0.75));
+    showFocus(b.x, b.y, b.name.split("/")[0] + " (" + code + ")" + (hiFloor ? " " + hiFloor + "층" : ""));
     openDetail(
       '<div class="cat" style="--c:#8a5a1c">🏫 건물 안내</div>' +
       "<h3>" + esc(b.name) + ' <span class="bd">' + esc(code) + "</span></h3>" +
@@ -612,6 +648,7 @@
   }
   function closeDetail(silent) {
     $("#detail").hidden = true;
+    clearFocus();
     detailCtx = null;
     if (!silent) {
       state.sel = null;
@@ -627,6 +664,14 @@
     var back = e.target.closest(".back");
     if (back && detailCtx && detailCtx.bld) return showBuilding(detailCtx.bld, detailCtx.floor, detailCtx.room, detailCtx.group);
     if (back && detailCtx && detailCtx.group) return showGroup(detailCtx.key, detailCtx.group);
+    var lc = e.target.closest("[data-locate]");
+    if (lc) {
+      var lp = PLACE[+lc.dataset.locate];
+      if (isMobile()) setView("map");
+      flyToVisible(ll(lp.x, lp.y), Math.max(map.getZoom(), homeZoom + 1));
+      showFocus(lp.x, lp.y, placeLabel(lp));
+      return;
+    }
     var cg = e.target.closest("[data-cat-go]");
     if (cg) { state.cat = cg.dataset.catGo; state.sel = null; closeDetail(true); render(); writeHash(); if (isMobile()) setView("list"); return; }
     var rb = e.target.closest("[data-goroute]");
@@ -675,6 +720,7 @@
       "<dl>" + rows.map(function (r) { return "<dt>" + r[0] + "</dt><dd>" + r[1] + "</dd>"; }).join("") + "</dl>" +
       notes.map(function (n) { return '<div class="note">' + n + "</div>"; }).join("") +
       '<div class="actions">' +
+      (p.x != null ? '<button class="btn locate" data-locate="' + p.id + '">📍 지도에서 위치 보기</button>' : "") +
       (r ? '<button class="btn route" data-goroute="' + r.id + '" style="--rc:' + r.color + '">🚶 동선 보기</button>' : "") +
       (p.link ? '<a class="btn primary" href="' + esc(p.link) + '" target="_blank" rel="noopener">네이버지도에서 보기 ↗</a>' :
         '<a class="btn" href="https://map.naver.com/p/search/' + encodeURIComponent(p.name.replace(/\(.*?\)/g, "")) + '" target="_blank" rel="noopener">네이버지도에서 검색 ↗</a>') +
@@ -701,13 +747,10 @@
     if (p.x != null && !keepView) {
       var z = Math.max(map.getZoom(), homeZoom + 0.75);
       var target = ll(p.x, p.y);
-      moveMap(function () {
-        if (isMobile()) {
-          map.setView(target, z, { animate: false });
-          map.panBy([0, map.getSize().y * 0.22], { animate: false });
-        } else map.flyTo(target, z, { duration: 0.5 });
-      });
+      $("#detail").hidden = false; // 카드 크기를 알고 옮기도록 먼저 표시
+      flyToVisible(target, z);
     }
+    if (p.x != null) showFocus(p.x, p.y, placeLabel(p)); else clearFocus();
     var info = markerByKey[id];
     var keepBld = fromGroup && detailCtx && detailCtx.bld ? detailCtx : null;
     showPlace(p, fromGroup);
@@ -769,6 +812,16 @@
     var el = document.querySelector('.item[data-id="' + state.sel + '"]');
     if (el) el.classList.add("on");
   }
+  $("#list").addEventListener("mouseover", function (e) {
+    var li = e.target.closest(".item");
+    if (!li || isMobile()) return;
+    var p = PLACE[+li.dataset.id];
+    if (p && p.x != null && state.sel !== p.id) showFocus(p.x, p.y, placeLabel(p), true);
+  });
+  $("#list").addEventListener("mouseleave", function () {
+    var p = state.sel && PLACE[state.sel];
+    if (p && p.x != null) showFocus(p.x, p.y, placeLabel(p)); else if (!detailCtx || !detailCtx.bld) clearFocus();
+  });
   $("#list").addEventListener("click", function (e) {
     var li = e.target.closest(".item");
     if (li) selectPlace(+li.dataset.id);
