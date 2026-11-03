@@ -361,13 +361,11 @@ h1 { font-size: 20px; margin: 0; letter-spacing: -.02em; }
 /* ------------------------------------------------ 선택한 위치 강조 */
 .focus { position: relative; width: 0; height: 0; pointer-events: none; }
 .focus .ring {
-  position: absolute; left: -32px; top: -32px; width: 64px; height: 64px; border-radius: 50%;
-  border: 4px solid #e8590c; background: rgba(232, 89, 12, .12);
-  animation: focusPulse 1.6s ease-out infinite;
+  position: absolute; left: -28px; top: -51px; width: 56px; height: 56px; border-radius: 50%;
+  border: 3px solid #e8590c; box-shadow: 0 0 0 2px #fff;
 }
-.focus .ring.r2 { animation-delay: .8s; }
 .focus .flabel {
-  position: absolute; left: 0; bottom: 44px; transform: translateX(-50%);
+  position: absolute; left: 0; bottom: 60px; transform: translateX(-50%);
   white-space: nowrap; background: #e8590c; color: #fff; font: 700 13.5px/1 var(--font);
   padding: 8px 12px; border-radius: 999px; box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
 }
@@ -375,8 +373,7 @@ h1 { font-size: 20px; margin: 0; letter-spacing: -.02em; }
   content: ""; position: absolute; left: 50%; bottom: -6px; margin-left: -6px;
   border: 6px solid transparent; border-top-color: #e8590c; border-bottom: 0;
 }
-.focus.soft .ring { border-color: #fd7e14; opacity: .7; }
+.focus.soft .ring { border-color: #868e96; border-style: dashed; }
 .focus.soft .flabel { background: rgba(43, 38, 32, .85); }
 .focus.soft .flabel::after { border-top-color: rgba(43, 38, 32, .85); }
-@keyframes focusPulse { 0% { transform: scale(.45); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
 .btn.locate { background: #fff4e6; border-color: #ffc078; color: #c2410c; font-weight: 600; }

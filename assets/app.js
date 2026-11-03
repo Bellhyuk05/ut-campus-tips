@@ -132,7 +132,7 @@
     L.marker(ll(x, y), {
       interactive: false, keyboard: false, zIndexOffset: 2000,
       icon: L.divIcon({ className: "", iconSize: [0, 0], iconAnchor: [0, 0],
-        html: '<div class="focus' + (soft ? " soft" : "") + '"><span class="ring"></span><span class="ring r2"></span>' +
+        html: '<div class="focus' + (soft ? " soft" : "") + '"><span class="ring"></span>' +
           (label ? '<span class="flabel">📍 ' + esc(label) + "</span>" : "") + "</div>" })
     }).addTo(focusLayer);
   }
